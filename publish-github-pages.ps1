@@ -32,7 +32,7 @@ if (-not $hasRemote) {
   & $Git push -u origin main
 }
 
-& $Gh api -X POST "repos/:owner/$RepoName/pages" -f source.branch='main' -f source.path='/' 2>$null
+& $Gh api -X POST "repos/:owner/$RepoName/pages" -H "Accept: application/vnd.github+json" -F "source[branch]=main" -F "source[path]=/" 2>$null
 if ($LASTEXITCODE -ne 0) {
   Write-Host 'Pages may already be enabled. Continuing.'
 }
