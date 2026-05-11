@@ -1,0 +1,396 @@
+:root {
+  color-scheme: light;
+  --ink: #101820;
+  --muted: #64707d;
+  --line: #d9e2e7;
+  --paper: #fbfcf8;
+  --panel: #ffffff;
+  --accent: #0f766e;
+  --accent-2: #c2410c;
+  --accent-3: #365a7d;
+  --soft: #edf7f4;
+  --shadow: 0 18px 50px rgba(16, 24, 32, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, #eef6f1 0, var(--paper) 280px);
+  color: var(--ink);
+}
+
+button, input, select, textarea { font: inherit; }
+
+button {
+  cursor: pointer;
+  border: 0;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: max(18px, env(safe-area-inset-top)) 18px 14px;
+  background: rgba(238, 246, 241, 0.92);
+  border-bottom: 1px solid rgba(16, 24, 32, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.app-header h1, h2, p { margin: 0; }
+
+.app-header h1 {
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn, .ghost-btn {
+  min-width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: white;
+  font-weight: 800;
+}
+
+.ghost-btn {
+  padding: 0 14px;
+  background: #e4eee9;
+  color: var(--ink);
+}
+
+main {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 18px 14px 80px;
+}
+
+.controls-band {
+  display: grid;
+  grid-template-columns: 0.6fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+label span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+select, input, textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+}
+
+select, input {
+  min-height: 44px;
+  padding: 9px 11px;
+}
+
+textarea {
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.today-panel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 20px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.today-panel .eyebrow { color: #8ee4d5; }
+
+.today-panel h2 {
+  margin-top: 8px;
+  font-size: clamp(26px, 8vw, 46px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.today-panel p:last-child {
+  margin-top: 10px;
+  color: #d8e5e2;
+}
+
+.score-ring {
+  position: relative;
+  width: 132px;
+  height: 132px;
+}
+
+.score-ring strong {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.insight-grid article, .charts > div, .exercise-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.insight-grid article {
+  padding: 14px;
+}
+
+.insight-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.insight-grid strong {
+  display: block;
+  margin-top: 7px;
+  font-size: clamp(18px, 4vw, 25px);
+  line-height: 1.1;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0 20px;
+}
+
+.charts > div {
+  min-width: 0;
+  padding: 14px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.section-heading h2 {
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.section-heading span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.section-heading select {
+  width: min(260px, 52%);
+}
+
+canvas {
+  width: 100%;
+  display: block;
+}
+
+.exercise-list {
+  display: grid;
+  gap: 10px;
+}
+
+.exercise-card {
+  overflow: hidden;
+}
+
+.exercise-main {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
+  background: white;
+  color: var(--ink);
+  text-align: left;
+}
+
+.exercise-index {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--soft);
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.exercise-name {
+  display: block;
+  line-height: 1.2;
+}
+
+.exercise-prescription {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.25;
+}
+
+.target-pill {
+  max-width: 132px;
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: #f6e8dd;
+  color: var(--accent-2);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.exercise-detail {
+  display: none;
+  padding: 0 14px 14px;
+}
+
+.exercise-card.open .exercise-detail {
+  display: block;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 2px 0 10px;
+}
+
+.detail-grid span {
+  padding: 10px;
+  border-radius: 8px;
+  background: #f3f7f4;
+}
+
+.detail-grid b, .detail-grid em {
+  display: block;
+  font-style: normal;
+}
+
+.detail-grid b {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.detail-grid em {
+  margin-top: 3px;
+  font-weight: 800;
+}
+
+.notes {
+  margin: 10px 0;
+  color: #344451;
+  line-height: 1.45;
+}
+
+.sets {
+  display: grid;
+  gap: 8px;
+}
+
+.set-row {
+  display: grid;
+  grid-template-columns: 54px 1fr 1fr;
+  gap: 8px;
+  align-items: end;
+}
+
+.set-row strong {
+  padding-bottom: 12px;
+  color: var(--accent-3);
+  font-size: 13px;
+}
+
+.note-field {
+  display: block;
+  margin-top: 12px;
+}
+
+@media (max-width: 780px) {
+  .today-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .score-ring {
+    width: 108px;
+    height: 108px;
+  }
+
+  .insight-grid, .charts {
+    grid-template-columns: 1fr;
+  }
+
+  .controls-band {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .exercise-main {
+    grid-template-columns: 28px 1fr;
+  }
+
+  .target-pill {
+    grid-column: 2;
+    max-width: none;
+    width: fit-content;
+  }
+
+  .detail-grid, .set-row {
+    grid-template-columns: 1fr;
+  }
+
+  .set-row strong {
+    padding-bottom: 0;
+  }
+}
