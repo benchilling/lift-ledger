@@ -67,6 +67,21 @@ The app saves automatically on your iPhone.
 - Rep improvement.
 - Progress charts.
 
+
+## How Progression Works In The App
+
+The program uses double progression for exercises with rep ranges. That means:
+
+1. Keep the same load while you add reps.
+2. Try to add at least one rep to at least one set next time.
+3. Once all working sets hit the top of the rep range, add a small amount of weight.
+4. After adding weight, aim back near the bottom of the rep range.
+5. Keep form consistent. Do not count sloppy reps as progress.
+
+Example: if bench press is 8-10 reps and last week you logged `135 x 8`, this week the app will show that previous set and tell you to beat 8 reps. If you eventually log 10 reps on all working sets, the next target becomes `Add load`.
+
+The app also lets you record actual RPE. The listed RPE is the prescription; your entered RPE is your real session note for that set.
+
 ## Backups
 
 Your workout history lives on your iPhone, not GitHub.

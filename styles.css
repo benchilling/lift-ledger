@@ -322,6 +322,28 @@ canvas {
   font-weight: 800;
 }
 
+.progress-box {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid #dce9e4;
+  border-radius: 8px;
+  background: #f8fbf8;
+}
+
+.progress-box span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.progress-box strong {
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
 .notes {
   margin: 10px 0;
   color: #344451;
@@ -335,7 +357,7 @@ canvas {
 
 .set-row {
   display: grid;
-  grid-template-columns: 54px 1fr 1fr;
+  grid-template-columns: 54px 1.2fr 1fr 1fr 0.8fr;
   gap: 8px;
   align-items: end;
 }
@@ -344,6 +366,34 @@ canvas {
   padding-bottom: 12px;
   color: var(--accent-3);
   font-size: 13px;
+}
+
+.previous-set {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcf8;
+}
+
+.previous-set span, .previous-set em {
+  display: block;
+  font-style: normal;
+}
+
+.previous-set span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.previous-set em {
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .note-field {

@@ -61,8 +61,10 @@ function setLog(week, dayIndex, exerciseId, log) {
 
 function parseRepRange(reps) {
   const nums = String(reps).match(/\d+/g)?.map(Number) || [];
-  if (!nums.length) return { low: 0, high: 0 };
-  return { low: nums[0], high: nums[nums.length - 1] };
+  if (!nums.length) return { low: 0, high: 0, isRange: false };
+  const low = nums[0];
+  const high = nums[nums.length - 1];
+  return { low, high, isRange: nums.length > 1 && high > low };
 }
 
 function setVolume(set) {
@@ -75,6 +77,26 @@ function exerciseVolume(log) {
 
 function completedSets(log) {
   return (log.sets || []).filter((set) => Number(set.reps || 0) > 0 || Number(set.load || 0) > 0).length;
+}
+
+function loggedSets(log) {
+  return (log?.sets || []).filter((set) => Number(set.reps || 0) > 0 || Number(set.load || 0) > 0);
+}
+
+function formatSet(set) {
+  const load = Number(set?.load || 0);
+  const reps = Number(set?.reps || 0);
+  const rpe = set?.rpe ? ` @ RPE ${set.rpe}` : "";
+  if (!load && !reps) return "-";
+  if (!load) return `${reps} reps${rpe}`;
+  if (!reps) return `${load} lb${rpe}`;
+  return `${load} x ${reps}${rpe}`;
+}
+
+function summarizeLog(log) {
+  const sets = loggedSets(log);
+  if (!sets.length) return "No previous log yet";
+  return sets.map((set, index) => `S${index + 1}: ${formatSet(set)}`).join(" | ");
 }
 
 function findPreviousExercise(exerciseName, weekNumber) {
@@ -96,14 +118,46 @@ function findPreviousExercise(exerciseName, weekNumber) {
 function targetForExercise(exercise, weekNumber) {
   const previous = findPreviousExercise(exercise.exercise, weekNumber);
   const range = parseRepRange(exercise.reps);
-  if (!previous) return `${exercise.reps} reps`;
+  const base = {
+    label: `${exercise.reps} reps`,
+    summary: `Start with a load that lets you land in the ${exercise.reps} rep target at the listed RPE.`,
+    previousText: "No previous log yet",
+    previous,
+    placeholders: [],
+    addLoad: false,
+  };
+  if (!previous) return base;
 
-  const bestSet = [...previous.log.sets].sort((a, b) => Number(b.reps || 0) - Number(a.reps || 0))[0] || {};
-  const lastReps = Number(bestSet.reps || 0);
-  const lastLoad = Number(bestSet.load || 0);
-  if (lastReps >= range.high && range.high > 0 && lastLoad > 0) return `Add load, hit ${range.low}+`;
-  if (lastReps > 0) return `Beat ${lastReps} reps`;
-  return `${exercise.reps} reps`;
+  const sets = loggedSets(previous.log);
+  const maxedCurrentSetCount = range.isRange && sets.length >= exercise.workingSets && sets.slice(0, exercise.workingSets).every((set) => Number(set.reps || 0) >= range.high);
+  const lastLoad = Number(sets[0]?.load || 0);
+  const bestReps = Math.max(0, ...sets.map((set) => Number(set.reps || 0)));
+
+  base.previousText = `Last logged W${previous.week}: ${summarizeLog(previous.log)}`;
+  base.placeholders = Array.from({ length: exercise.workingSets }, (_, index) => {
+    const prior = sets[index] || sets.at(-1) || {};
+    const priorReps = Number(prior.reps || 0);
+    const nextReps = range.isRange && priorReps ? Math.min(priorReps + 1, range.high) : range.low || priorReps || "";
+    return { load: prior.load || "", reps: nextReps, rpe: "" };
+  });
+
+  if (range.isRange && maxedCurrentSetCount && lastLoad > 0) {
+    base.addLoad = true;
+    base.label = "Add load";
+    base.summary = `You reached ${range.high} on all logged working sets. Add a small amount of weight, then aim for ${range.low}+ reps with clean form.`;
+    base.placeholders = base.placeholders.map((item) => ({ ...item, reps: range.low }));
+    return base;
+  }
+
+  if (range.isRange && bestReps > 0) {
+    base.label = `Beat ${bestReps}`;
+    base.summary = `Keep the same load if form was solid. Add 1 rep to at least one set, working toward ${range.high} on every set before adding weight.`;
+    return base;
+  }
+
+  base.label = `Hit ${exercise.reps}`;
+  base.summary = `Repeat the target reps at the listed RPE. Add load only when the reps are clean and the effort is no harder than prescribed.`;
+  return base;
 }
 
 function initSelectors() {
@@ -151,8 +205,11 @@ function renderWorkout() {
     const log = getLog(week.week, Number(state.day), exercise.id);
     node.querySelector(".exercise-index").textContent = index + 1;
     node.querySelector(".exercise-name").textContent = exercise.exercise;
+    const target = targetForExercise(exercise, week.week);
     node.querySelector(".exercise-prescription").textContent = `${exercise.workingSets} sets x ${exercise.reps} reps`;
-    node.querySelector(".target-pill").textContent = targetForExercise(exercise, week.week);
+    node.querySelector(".target-pill").textContent = target.label;
+    node.querySelector(".previous-summary").textContent = target.previousText;
+    node.querySelector(".target-summary").textContent = target.summary;
     node.querySelector(".rest").textContent = exercise.rest;
     node.querySelector(".rpe").textContent = [exercise.earlyRpe, exercise.lastRpe].filter(Boolean).join(" / ");
     node.querySelector(".warmups").textContent = exercise.warmupSets || "As needed";
@@ -163,22 +220,27 @@ function renderWorkout() {
       const set = log.sets[i] || {};
       const row = document.createElement("div");
       row.className = "set-row";
+      const prior = target.previous?.log?.sets?.[i] || {};
+      const placeholder = target.placeholders?.[i] || {};
       row.innerHTML = `
         <strong>Set ${i + 1}</strong>
-        <label><span>Load</span><input inputmode="decimal" type="number" min="0" step="0.5" value="${set.load ?? ""}" placeholder="lb"></label>
-        <label><span>Reps</span><input inputmode="numeric" type="number" min="0" step="1" value="${set.reps ?? ""}" placeholder="${exercise.reps}"></label>
+        <div class="previous-set"><span>Last</span><em>${escapeHtml(formatSet(prior))}</em></div>
+        <label><span>Load</span><input inputmode="decimal" type="number" min="0" step="0.5" value="${escapeHtml(set.load ?? "")}" placeholder="${escapeHtml(placeholder.load || "lb")}"></label>
+        <label><span>Reps</span><input inputmode="numeric" type="number" min="0" step="1" value="${escapeHtml(set.reps ?? "")}" placeholder="${escapeHtml(placeholder.reps || exercise.reps)}"></label>
+        <label><span>RPE</span><input inputmode="decimal" type="number" min="0" max="10" step="0.5" value="${escapeHtml(set.rpe ?? "")}" placeholder="${escapeHtml(i + 1 === exercise.workingSets ? exercise.lastRpe : exercise.earlyRpe)}"></label>
       `;
-      const [loadInput, repsInput] = row.querySelectorAll("input");
+      const [loadInput, repsInput, rpeInput] = row.querySelectorAll("input");
       const persist = () => {
         const fresh = getLog(week.week, Number(state.day), exercise.id);
         fresh.exercise = exercise.exercise;
         fresh.week = week.week;
         fresh.day = day.name;
-        fresh.sets[i] = { load: loadInput.value, reps: repsInput.value };
+        fresh.sets[i] = { load: loadInput.value, reps: repsInput.value, rpe: rpeInput.value };
         setLog(week.week, Number(state.day), exercise.id, fresh);
       };
       loadInput.addEventListener("input", persist);
       repsInput.addEventListener("input", persist);
+      rpeInput.addEventListener("input", persist);
       sets.appendChild(row);
     }
     const note = node.querySelector("textarea");
@@ -212,7 +274,7 @@ function renderInsights() {
   els.volume.textContent = `${Math.round(volume).toLocaleString()} lb`;
 
   const firstOpen = day.exercises.find((exercise) => completedSets(getLog(week.week, Number(state.day), exercise.id)) < exercise.workingSets);
-  els.nextTarget.textContent = firstOpen ? `${firstOpen.exercise}: ${targetForExercise(firstOpen, week.week)}` : "Day complete";
+  els.nextTarget.textContent = firstOpen ? `${firstOpen.exercise}: ${targetForExercise(firstOpen, week.week).label}` : "Day complete";
 
   const repGain = calculateRepGain(week.week);
   els.reps.textContent = `${repGain >= 0 ? "+" : ""}${repGain} reps`;
