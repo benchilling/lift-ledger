@@ -1,4 +1,4 @@
-const cacheName = "lift-ledger-v1";
+const cacheName = "lift-ledger-v2";
 const files = ["./", "./index.html", "./styles.css", "./app.js", "./program-data.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
